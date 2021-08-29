@@ -40,7 +40,7 @@ module VolgaCTF
             port: ::ENV['REDIS_PORT'].to_i || 6379,
             db: ::ENV['VOLGACTF_FINAL_STREAM_REDIS_DB'].to_i || 0
           }
-          unless ::ENV.fetch('REDIS_PASSWORD', nil).nil?
+          unless ::ENV.fetch('REDIS_PASSWORD', '').empty?
             connection_params[:password] = ::ENV['REDIS_PASSWORD']
           end
           @_client = ::Redis.new(**connection_params)

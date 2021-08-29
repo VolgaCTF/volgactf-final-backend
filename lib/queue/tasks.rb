@@ -14,7 +14,7 @@ config_redis = {
   url: "redis://#{::ENV['REDIS_HOST']}:#{::ENV['REDIS_PORT']}/#{::ENV['VOLGACTF_FINAL_QUEUE_REDIS_DB']}"
 }
 
-unless ::ENV.fetch('REDIS_PASSWORD', nil).nil?
+unless ::ENV.fetch('REDIS_PASSWORD', '').empty?
   config_redis[:password] = ::ENV['REDIS_PASSWORD']
 end
 
