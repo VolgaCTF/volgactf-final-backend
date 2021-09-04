@@ -246,7 +246,7 @@ module VolgaCTF
                   team_name: team.name,
                   service_name: service.name
                 },
-                report_url: "http://#{::ENV['VOLGACTF_FINAL_MASTER_ADDRESS']}:#{::ENV['VOLGACTF_FINAL_MASTER_PORT']}/api/checker/v2/report_pull"
+                report_url: "http://#{::ENV['VOLGACTF_FINAL_MASTER_HOST']}:#{::ENV['VOLGACTF_FINAL_MASTER_PORT']}/api/checker/v2/report_pull"
               }.to_json
 
               call_res = @remote_checker_ctrl.pull(service.checker_endpoint, job_data)
@@ -278,7 +278,7 @@ module VolgaCTF
                   team_name: team.name,
                   service_name: service.name
                 },
-                report_url: "http://#{::ENV['VOLGACTF_FINAL_MASTER_ADDRESS']}:#{::ENV['VOLGACTF_FINAL_MASTER_PORT']}/api/checker/v2/report_push"
+                report_url: "http://#{::ENV['VOLGACTF_FINAL_MASTER_HOST']}:#{::ENV['VOLGACTF_FINAL_MASTER_PORT']}/api/checker/v2/report_push"
               }.to_json
 
               call_res = @remote_checker_ctrl.push(service.checker_endpoint, job_data)
