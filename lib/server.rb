@@ -268,7 +268,21 @@ module VolgaCTF
           json r
         end
 
+        helpers do
+          def internal_protected!
+            return if internal_authorized?
+            headers['WWW-Authenticate'] = 'Basic realm="Restricted Area"'
+            halt 401, "Not authorized\n"
+          end
+
+          def internal_authorized?
+            @auth ||= Rack::Auth::Basic::Request.new(request.env)
+            @auth.provided? && @auth.basic? && @auth.credentials && @auth.credentials == [::ENV['VOLGACTF_FINAL_AUTH_MASTER_USERNAME'], ::ENV['VOLGACTF_FINAL_AUTH_MASTER_PASSWORD']]
+          end
+        end
+
         post '/api/checker/v2/report_push' do
+          internal_protected!
           unless request.content_type == 'application/json'
             halt 400
           end
@@ -305,6 +319,7 @@ module VolgaCTF
         end
 
         post '/api/checker/v2/report_pull' do
+          internal_protected!
           unless request.content_type == 'application/json'
             halt 400
           end
