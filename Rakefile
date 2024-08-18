@@ -17,8 +17,18 @@ namespace :db do
       database: ::ENV['PG_DATABASE']
     }
 
+    clean_query = %{
+        do $$ declare
+            r record;
+        begin
+            for r in (select tablename from pg_tables where schemaname = 'public') loop
+                execute 'drop table if exists ' || quote_ident(r.tablename) || ' cascade';
+        end loop;
+    end $$;
+    }
+
     ::Sequel.connect(connection_params) do |db|
-      db.run 'DROP OWNED BY CURRENT_USER'
+      db.run clean_query
     end
 
     ::Sequel.extension :migration
