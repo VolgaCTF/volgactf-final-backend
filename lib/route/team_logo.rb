@@ -8,20 +8,6 @@ module VolgaCTF
   module Final
     module Server
       class Application < ::Sinatra::Base
-        get %r{/api/team/logo/(\d{1,2})\.png} do |team_id_str|
-          team_id = team_id_str.to_i
-          team = ::VolgaCTF::Final::Model::Team[team_id]
-          halt 404 if team.nil?
-
-          filename = ::File.join(::ENV['VOLGACTF_FINAL_TEAM_LOGO_DIR'], "#{team.alias}.png")
-          unless ::File.exist?(filename)
-            filename = ::File.join(::Dir.pwd, 'logo', 'default.png')
-          end
-
-          cache_control :public
-          send_file filename
-        end
-
         post '/api/team/logo' do
           team = @identity_ctrl.get_team(@remote_ip)
 

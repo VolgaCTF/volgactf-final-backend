@@ -32,7 +32,7 @@ module VolgaCTF
             image = ::MiniMagick::Image.open(path)
             image.resize('48x48')
             image.format('png')
-            image_path = ::File.join(::ENV['VOLGACTF_FINAL_TEAM_LOGO_DIR'], "#{team.alias}.png")
+            image_path = ::File.join(::ENV['VOLGACTF_FINAL_TEAM_LOGO_DIR'], "#{team.id}.png")
             image.write(image_path)
             sha256 = ::Digest::SHA256.file(image_path)
 

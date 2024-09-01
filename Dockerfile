@@ -19,7 +19,7 @@ COPY lib ./lib
 COPY logo ./logo
 COPY migrations ./migrations
 
-RUN apk add --no-cache --virtual .build-deps make g++ gcc musl-dev && apk add postgresql-dev && gem install bundler -v 2.0.1 && bundle && apk del .build-deps
+RUN apk add --no-cache --virtual .build-deps make g++ gcc musl-dev && apk add postgresql-dev graphicsmagick && gem install bundler -v 2.0.1 && bundle && apk del .build-deps
 RUN addgroup volgactf && adduser --disabled-password --gecos "" --ingroup volgactf --no-create-home volgactf && chown -R volgactf:volgactf .
 USER volgactf
 ENTRYPOINT ["/bin/sh", "entrypoint.sh"]

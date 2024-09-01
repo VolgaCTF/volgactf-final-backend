@@ -7,7 +7,6 @@ require 'mini_magick'
 
 require './lib/controller/attack'
 require './lib/util/event_emitter'
-require './lib/util/rack_monkey_patch'
 require './lib/model/bootstrap'
 require './lib/controller/ctftime'
 require './lib/const/submit_result'
