@@ -18,6 +18,10 @@ module VolgaCTF
             ::VolgaCTF::Final::Queue::Tasks::Planner.perform_async
           end
 
+          ::EM.add_periodic_timer 30 do
+            ::VolgaCTF::Final::Queue::Tasks::OpenDataIndexCleaner.perform_async
+          end
+
           ::Signal.trap 'INT' do
             ::EM.stop
           end

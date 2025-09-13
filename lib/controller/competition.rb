@@ -17,6 +17,7 @@ require './lib/queue/tasks'
 require './lib/const/flag_poll_state'
 require './lib/util/logger'
 require './lib/controller/domain'
+require './lib/controller/open_data'
 
 module VolgaCTF
   module Final
@@ -35,6 +36,7 @@ module VolgaCTF
           @flag_ctrl = ::VolgaCTF::Final::Controller::Flag.new
           @scoreboard_ctrl = ::VolgaCTF::Final::Controller::Scoreboard.new
           @domain_ctrl = ::VolgaCTF::Final::Controller::Domain.new
+          @open_data_ctrl = ::VolgaCTF::Final::Controller::OpenData.new
         end
 
         def init
@@ -153,7 +155,7 @@ module VolgaCTF
           @stage_ctrl.finish
         end
 
-        def handle_push(flag, status, label, message)
+        def handle_push(flag, status, label, message, open_data)
           return unless @domain_ctrl.available?
 
           ::VolgaCTF::Final::Model::DB.transaction(
@@ -166,11 +168,32 @@ module VolgaCTF
               expires = (cutoff.to_time + @domain_ctrl.settings.flag_lifetime).to_datetime
               flag.expired_at = expires
               flag.label = label
+              flag.open_data = open_data
               flag.save
 
               ::VolgaCTF::Final::Model::DB.after_commit do
                 @logger.info("Successfully pushed flag `#{flag.flag}`!")
                 ::VolgaCTF::Final::Queue::Tasks::PullFlag.perform_async(flag.flag)
+
+                begin
+                  if flag.open_data.nil? || flag.open_data.empty?
+                    @logger.info("No open data submitted for the flag `#{flag.flag}`")
+                  else
+                    open_data_key = "flag-#{flag.flag}"
+                    open_data_val = {
+                      round_id: flag.round.id,
+                      team_id: flag.team.id,
+                      service_id: flag.service.id,
+                      open_data: flag.open_data,
+                      expires: flag.expired_at.iso8601,
+                    }
+
+                    @open_data_ctrl.cache_open_data(open_data_key, open_data_val, @domain_ctrl.settings.flag_lifetime, expires)
+                    @logger.info("Cached open data for the flag `#{flag.flag}`!")
+                  end
+                rescue => e
+                  @logger.error(e.to_s)
+                end
               end
             else
               @logger.info("Failed to push flag `#{flag.flag}` (status code "\

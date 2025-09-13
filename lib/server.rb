@@ -19,6 +19,7 @@ require './lib/controller/scoreboard'
 require './lib/controller/image'
 require './lib/controller/score'
 require './lib/controller/team_service_state'
+require './lib/controller/open_data'
 
 module VolgaCTF
   module Final
@@ -42,6 +43,7 @@ module VolgaCTF
           @image_ctrl = ::VolgaCTF::Final::Controller::Image.new
           @score_ctrl = ::VolgaCTF::Final::Controller::Score.new
           @team_service_state_ctrl = ::VolgaCTF::Final::Controller::TeamServiceState.new
+          @open_data_ctrl = ::VolgaCTF::Final::Controller::OpenData.new
 
           ::MiniMagick.configure do |config|
             config.cli = :graphicsmagick
@@ -261,7 +263,8 @@ module VolgaCTF
             exp: flag_obj.expired_at.iso8601,
             round: flag_obj.round_id,
             team: flag_obj.team.name,
-            service: flag_obj.service.name
+            service: flag_obj.service.name,
+            open_data: flag_obj.open_data
           }
 
           json r
@@ -306,7 +309,8 @@ module VolgaCTF
                 flag,
                 payload['status'],
                 payload['label'],
-                payload['message']
+                payload['message'],
+                payload['open_data']
               )
             end
           rescue => e
@@ -363,3 +367,4 @@ require './lib/route/public_service'
 require './lib/route/notification'
 require './lib/route/team_logo'
 require './lib/route/event'
+require './lib/route/open_data'

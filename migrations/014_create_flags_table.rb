@@ -8,6 +8,7 @@
       DateTime :expired_at, null: true
       String :label, text: true, null: false
       String :capsule, text: true, null: false
+      String :open_data, text: true, null: true
 
       foreign_key :team_id, :teams, index: true, null: false
       foreign_key :service_id, :services, index: true, null: false

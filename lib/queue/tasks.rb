@@ -6,6 +6,7 @@ require './lib/util/logger'
 require './lib/controller/competition_stage'
 require './lib/controller/competition'
 require './lib/controller/image'
+require './lib/controller/open_data'
 require './lib/util/logger'
 
 logger = ::VolgaCTF::Final::Util::Logger.get
@@ -72,6 +73,16 @@ module VolgaCTF
             if competition_ctrl.can_finish?
               ::VolgaCTF::Final::Queue::Tasks::TriggerFinish.perform_async
             end
+          end
+        end
+
+        class OpenDataIndexCleaner
+          include ::Sidekiq::Worker
+          sidekiq_options :retry => false
+
+          def perform
+            open_data_ctrl = ::VolgaCTF::Final::Controller::OpenData.new
+            open_data_ctrl.cleanup_open_data_index
           end
         end
 

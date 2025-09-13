@@ -42,6 +42,7 @@ module VolgaCTF
                 expired_at: nil,
                 label: label,
                 capsule: encode(flag),
+                open_data: nil,
                 service_id: service.id,
                 team_id: team.id,
                 round_id: round.id
