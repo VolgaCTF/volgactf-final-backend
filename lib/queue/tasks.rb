@@ -1,3 +1,4 @@
+require 'find'
 require 'sidekiq'
 require 'mini_magick'
 
@@ -83,6 +84,25 @@ module VolgaCTF
           def perform
             open_data_ctrl = ::VolgaCTF::Final::Controller::OpenData.new
             open_data_ctrl.cleanup_open_data_index
+          end
+        end
+
+        class UploadDirCleaner
+          include ::Sidekiq::Worker
+          sidekiq_options :retry => false
+
+          def perform
+            logger.info "Started cleaning up upload dir #{::ENV['VOLGACTF_FINAL_UPLOAD_DIR']}..."
+            num_deleted = 0
+            ::Find.find(::ENV['VOLGACTF_FINAL_UPLOAD_DIR']) do |path|
+              next unless ::File.file?(path)
+              next unless ::File.basename(path).start_with?('logo')
+              next unless (::Time.now - ::File.mtime(path)) > 300
+
+              ::File.delete(path)
+              num_deleted += 1
+            end
+            logger.info "Finished cleaning up upload dir #{::ENV['VOLGACTF_FINAL_UPLOAD_DIR']}: deleted #{num_deleted} file(s)"
           end
         end
 

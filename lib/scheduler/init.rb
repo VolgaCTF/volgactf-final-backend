@@ -22,6 +22,10 @@ module VolgaCTF
             ::VolgaCTF::Final::Queue::Tasks::OpenDataIndexCleaner.perform_async
           end
 
+          ::EM.add_periodic_timer 150 do
+            ::VolgaCTF::Final::Queue::Tasks::UploadDirCleaner.perform_async
+          end
+
           ::Signal.trap 'INT' do
             ::EM.stop
           end
