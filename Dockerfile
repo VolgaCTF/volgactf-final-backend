@@ -1,6 +1,8 @@
 FROM ruby:2.5.5-alpine
 LABEL maintainer="VolgaCTF"
 
+ARG UID=1337
+ARG GID=1337
 ARG BUILD_DATE
 ARG BUILD_VERSION
 ARG VCS_REF
@@ -19,7 +21,8 @@ COPY lib ./lib
 COPY logo ./logo
 COPY migrations ./migrations
 
+ENV BUNDLE_USER_HOME=/tmp/bundler
 RUN apk add --no-cache --virtual .build-deps make g++ gcc musl-dev && apk add postgresql-dev graphicsmagick && gem install bundler -v 2.0.1 && bundle && apk del .build-deps
-RUN addgroup volgactf && adduser --disabled-password --gecos "" --ingroup volgactf --no-create-home volgactf && chown -R volgactf:volgactf .
+RUN addgroup --gid ${GID} volgactf && adduser --uid ${UID} --disabled-password --gecos "" --ingroup volgactf --no-create-home volgactf && chown -R volgactf:volgactf .
 USER volgactf
 ENTRYPOINT ["/bin/sh", "entrypoint.sh"]
