@@ -14,7 +14,7 @@ module VolgaCTF
       class Service
         attr_accessor :alias, :name, :vulnbox_endpoint_code,
                       :checker_endpoint, :attack_priority,
-                      :enable_in, :disable_in
+                      :poll_grace_period, :enable_in, :disable_in
 
         def initialize(service_alias)
           @alias = service_alias
@@ -22,6 +22,7 @@ module VolgaCTF
           @vulnbox_endpoint_code = nil
           @checker_endpoint = nil
           @attack_priority = false
+          @poll_grace_period = 0
         end
       end
 
@@ -46,6 +47,10 @@ module VolgaCTF
 
         def attack_priority(attack_priority)
           @service.attack_priority = attack_priority
+        end
+
+        def poll_grace_period(poll_grace_period)
+          @service.poll_grace_period = poll_grace_period
         end
       end
 

@@ -142,6 +142,7 @@ module VolgaCTF
             vulnbox_endpoint_code: opts.vulnbox_endpoint_code,
             checker_endpoint: opts.checker_endpoint,
             attack_priority: opts.attack_priority,
+            poll_grace_period: opts.poll_grace_period,
             award_defence_after: nil,
             enabled: false,
             enable_in: nil,

@@ -106,7 +106,8 @@ module VolgaCTF
 
           @team_ctrl.all_teams(true).each do |team|
             @service_ctrl.enabled_services(shuffle: true).each do |service|
-              flag = flags.select { |f| f.team_id == team.id && f.service_id == service.id }.sample
+              grace_cutoff = (cutoff.to_time - service.poll_grace_period).to_datetime
+              flag = flags.select { |f| f.team_id == team.id && f.service_id == service.id && f.expired_at > grace_cutoff }.sample
 
               unless flag.nil?
                 begin
