@@ -4,11 +4,11 @@ require 'mini_magick'
 
 require './lib/model/bootstrap'
 require './lib/util/logger'
+require './lib/util/event_emitter'
 require './lib/controller/competition_stage'
 require './lib/controller/competition'
 require './lib/controller/image'
 require './lib/controller/open_data'
-require './lib/util/logger'
 
 logger = ::VolgaCTF::Final::Util::Logger.get
 
@@ -178,6 +178,50 @@ module VolgaCTF
             return if team.nil?
             image_ctrl = ::VolgaCTF::Final::Controller::Image.new
             image_ctrl.resize(path, team)
+          end
+        end
+
+        class UpdateServiceAwardDefenceAfter
+          include ::Sidekiq::Worker
+          sidekiq_options :retry => false
+
+          def perform(team_id, service_id, award_defence_after)
+            begin
+              ::VolgaCTF::Final::Model::DB.transaction do
+                service = ::VolgaCTF::Final::Model::Service[service_id]
+                if service.attack_priority && service.award_defence_after.nil?
+                  service.award_defence_after = award_defence_after
+                  service.save
+
+                  ::VolgaCTF::Final::Util::EventEmitter.broadcast(
+                    'service/modify',
+                    service.serialize
+                  )
+
+                  ::VolgaCTF::Final::Util::EventEmitter.emit_log(
+                    45,
+                    service_name: service.name,
+                    service_award_defence_after: service.award_defence_after
+                  )
+
+                  team = ::VolgaCTF::Final::Model::Team[team_id]
+                  notification = ::VolgaCTF::Final::Model::Notification.create(
+                    title: "First blood on #{service.name}!",
+                    description: ":tada: Congratulations to **#{team.name}**!  \nDefence points will be awarded after the end of the round #{service.award_defence_after}.",
+                    team_id: nil,
+                    created_at: ::DateTime.now,
+                    updated_at: ::DateTime.now
+                  )
+
+                  ::VolgaCTF::Final::Util::EventEmitter.broadcast(
+                    'notification/add',
+                    notification.serialize
+                  )
+                end
+              end
+            rescue Sequel::Plugins::OptimisticLocking::Error => e
+              logger.warn("Update failed due to concurrent modification: #{e.message}")
+            end
           end
         end
       end

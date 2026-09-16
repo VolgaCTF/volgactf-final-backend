@@ -11,6 +11,7 @@
       TrueClass :enabled, null: false, default: false
       Integer :enable_in, null: true, default: nil
       Integer :disable_in, null: true, default: nil
+      Integer :lock_version, null: false, default: 0
     end
   end
 

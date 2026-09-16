@@ -4,6 +4,8 @@ module VolgaCTF
   module Final
     module Model
       class Service < ::Sequel::Model
+        plugin :optimistic_locking
+
         one_to_many :flags
         one_to_many :team_service_states
         one_to_many :team_service_history_states

@@ -1,4 +1,4 @@
-FROM ruby:2.5.5-alpine
+FROM ruby:3.2-slim-trixie
 LABEL maintainer="VolgaCTF"
 
 ARG UID=1337
@@ -22,7 +22,16 @@ COPY logo ./logo
 COPY migrations ./migrations
 
 ENV BUNDLE_USER_HOME=/tmp/bundler
-RUN apk add --no-cache --virtual .build-deps make g++ gcc musl-dev && apk add postgresql-dev graphicsmagick && gem install bundler -v 2.0.1 && bundle && apk del .build-deps
-RUN addgroup --gid ${GID} volgactf && adduser --uid ${UID} --disabled-password --gecos "" --ingroup volgactf --no-create-home volgactf && chown -R volgactf:volgactf .
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update \
+	&& apt-get install --no-install-recommends -y build-essential libpq-dev graphicsmagick ca-certificates \
+	&& gem install bundler -v 2.4.22 \
+	&& bundle install \
+	&& apt-get purge -y --auto-remove build-essential \
+	&& rm -rf /var/lib/apt/lists/*
+RUN groupadd --gid ${GID} volgactf \
+	&& useradd --uid ${UID} --gid volgactf --no-create-home --shell /usr/sbin/nologin volgactf \
+	&& chown -R volgactf:volgactf .
 USER volgactf
 ENTRYPOINT ["/bin/sh", "entrypoint.sh"]

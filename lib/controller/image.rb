@@ -17,7 +17,7 @@ module VolgaCTF
           begin
             image = ::MiniMagick::Image.open(path)
           rescue => e
-            @logger.error(e.to_s)
+            @logger.error("#{e.class}: #{e.message}\n#{e.backtrace&.join("\n")}")
           end
 
           image

@@ -6,6 +6,7 @@ require './lib/controller/scoreboard'
 require './lib/util/event_emitter'
 require './lib/const/submit_result'
 require './lib/controller/domain'
+require './lib/queue/tasks'
 
 module VolgaCTF
   module Final
@@ -83,33 +84,11 @@ module VolgaCTF
               )
 
               if flag.service.attack_priority && flag.service.award_defence_after.nil?
-                flag.service.award_defence_after = @round_ctrl.last_number
-                flag.service.save
+                award_defence_after = @round_ctrl.last_number
 
-                ::VolgaCTF::Final::Util::EventEmitter.broadcast(
-                  'service/modify',
-                  flag.service.serialize
-                )
-
-                ::VolgaCTF::Final::Util::EventEmitter.emit_log(
-                  45,
-                  service_name: flag.service.name,
-                  service_award_defence_after: flag.service.award_defence_after
-                )
-
-                notification = ::VolgaCTF::Final::Model::Notification.create(
-                  title: "First blood on #{flag.service.name}!",
-                  description: ":tada: Congratulations to **#{team.name}**!  \nDefence points will be awarded after the end of the round #{flag.service.award_defence_after}.",
-                  team_id: nil,
-                  created_at: ::DateTime.now,
-                  updated_at: ::DateTime.now
-                )
-
-                event_data = notification.serialize
-                ::VolgaCTF::Final::Util::EventEmitter.broadcast(
-                  'notification/add',
-                  event_data
-                )
+                ::VolgaCTF::Final::Model::DB.after_commit do
+                  ::VolgaCTF::Final::Queue::Tasks::UpdateServiceAwardDefenceAfter.perform_async(team.id, flag.service.id, award_defence_after)
+                end
               end
 
               r = ::VolgaCTF::Final::Const::SubmitResult::SUCCESS
